@@ -5,7 +5,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: Arial; margin: 0; background: #f0f2f5; }
-    /* Модальное окно на весь экран */
     .modal {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -46,28 +45,6 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       min-height: 340px;
     }
-    .table-container {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      padding: 16px;
-      margin-top: 24px;
-      max-height: 320px;
-      overflow: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      margin-top: 8px;
-    }
-    th, td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #eaeaea;
-      text-align: left;
-    }
-    th { background: #f4f8fc; }
-    tr:last-child td { border-bottom: none; }
     @media (max-width: 900px) {
       .charts-grid { grid-template-columns: 1fr; }
       .modal-content { padding: 16px 6vw; }
@@ -99,32 +76,6 @@
         <div class="chart-container">
           <canvas id="hourlyChart"></canvas>
         </div>
-      </div>
-      <div class="table-container">
-        <h3>Топ 10 пользователей</h3>
-        <table id="userTable">
-          <thead>
-            <tr>
-              <th>Пользователь</th>
-              <th>Действий</th>
-              <th>% от общего</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="table-container">
-        <h3>Топ 10 действий</h3>
-        <table id="actionTable">
-          <thead>
-            <tr>
-              <th>Действие</th>
-              <th>Количество</th>
-              <th>% от общего</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
       </div>
     </div>
   </div>
@@ -184,11 +135,10 @@
         }
       });
 
-      // График по часам (распределение изменений по времени суток)
+      // График по часам
       const hourly = Array(24).fill(0);
       if (data.rows) {
         data.rows.forEach(row => {
-          // row[0] - timestamp
           const match = row[0].match(/\d{2}:\d{2}:\d{2}/);
           if (match) {
             const hour = parseInt(match[0].split(':')[0],10);
@@ -208,27 +158,6 @@
         },
         options: { plugins: { legend: { display: false } } }
       });
-
-      // Таблица пользователей
-      const userTable = document.getElementById('userTable').querySelector('tbody');
-      userTable.innerHTML = '';
-      const topUsers = actionsSortedBy(data.byUser, 10);
-      topUsers.forEach(([user, count]) => {
-        userTable.innerHTML += `<tr><td>${user}</td><td>${count}</td><td>${(count/data.total*100).toFixed(1)}%</td></tr>`;
-      });
-
-      // Таблица действий
-      const actionTable = document.getElementById('actionTable').querySelector('tbody');
-      actionTable.innerHTML = '';
-      const topActions = actionsSortedBy(data.byAction, 10);
-      topActions.forEach(([action, count]) => {
-        actionTable.innerHTML += `<tr><td>${action}</td><td>${count}</td><td>${(count/data.total*100).toFixed(1)}%</td></tr>`;
-      });
-    }
-
-    // Вспомогательная сортировка
-    function actionsSortedBy(obj, limit) {
-      return Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,limit);
     }
   </script>
 </body>
