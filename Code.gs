@@ -15,67 +15,35 @@ const CONFIG = {
 
 // ===== ОСНОВНОЙ ТРИГГЕР =====
 function onEdit(e) {
-  try {
-    if (!e) return;
-    const ss = SpreadsheetApp.getActive();
-    const sheet = e.range.getSheet();
-    const sheetName = sheet.getName();
+  // Получаем данные об изменении
+  var sheet = e.range.getSheet();
+  var row = e.range.getRow();
+  var col = e.range.getColumn();
+  var oldValue = e.oldValue || '';
+  var newValue = e.value || '';
+  var user = Session.getActiveUser().getEmail() || 'anonymous';
+  var timestamp = new Date();
 
-    if (!shouldTrackSheet_(sheetName)) return;
-    if (!shouldTrackColumn_(sheetName, e.range.getColumn())) return;
-    if ([CONFIG.LOG_SHEET, CONFIG.MIRROR_SHEET].includes(sheetName)) return;
-
-    const isRange = e.range.getNumRows() > 1 || e.range.getNumColumns() > 1;
-    const timestamp = formatDate_(new Date());
-    const user = Session.getActiveUser().getEmail() || 'anonymous';
-    const a1 = e.range.getA1Notation();
-    const rowStart = e.range.getRow();
-    const colStart = e.range.getColumn();
-    const rows = e.range.getNumRows();
-    const cols = e.range.getNumColumns();
-
-    let oldVal, newVal, newFormula = '', action, rangeSize = '', sample = '';
-
-    if (isRange && CONFIG.ENABLE_RANGE_DIFF) {
-      const mirror = ensureMirrorSheet_(ss);
-      const oldValues = getMirrorValues_(mirror, sheetName, rowStart, colStart, rows, cols);
-      const newValues = e.range.getValues();
-
-      oldVal = JSON.stringify(oldValues);
-      newVal = JSON.stringify(newValues);
-      rangeSize = `${rows}x${cols}`;
-      sample = createSample_(newValues);
-      action = 'RANGE_EDIT';
-
-      setMirrorValues_(mirror, sheetName, rowStart, colStart, newValues);
-    } else {
-      oldVal = typeof e.oldValue !== 'undefined' ? e.oldValue : '';
-      newVal = typeof e.value !== 'undefined' ? e.value : '';
-      newFormula = CONFIG.LOG_FORMULAS ? e.range.getFormula() || '' : '';
-      action = detectAction_(e, false);
-    }
-
-    const logEntry = [
-      timestamp,
-      user,
-      ss.getName(),
-      sheetName,
-      a1,
-      rowStart,
-      colStart,
-      rangeSize,
-      oldVal,
-      newVal,
-      newFormula,
-      action,
-      sample
-    ];
-
-    writeToCentralLog_(logEntry);
-
-  } catch (err) {
-    console.error('onEdit error:', err);
+  // Лист для хранения истории
+  var historySheetName = 'История';
+  var ss = SpreadsheetApp.getActive();
+  var historySheet = ss.getSheetByName(historySheetName);
+  if (!historySheet) {
+    historySheet = ss.insertSheet(historySheetName);
+    historySheet.appendRow(['Время', 'Пользователь', 'Лист', 'Ячейка', 'Было', 'Стало']);
+    historySheet.setFrozenRows(1);
   }
+
+  // Записываем изменение в историю
+  var cell = sheet.getRange(row, col).getA1Notation();
+  historySheet.appendRow([
+    timestamp,
+    user,
+    sheet.getName(),
+    cell,
+    oldValue,
+    newValue
+  ]);
 }
 
 // ===== ЗАПИСЬ В ЦЕНТРАЛЬНУЮ ТАБЛИЦУ =====
