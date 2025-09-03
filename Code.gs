@@ -81,7 +81,7 @@ function onEdit(e) {
 // ===== ЗАПИСЬ В ЦЕНТРАЛЬНУЮ ТАБЛИЦУ =====
 function writeToCentralLog_(row) {
   try {
-    const ss = SpreadsheetApp.openById(CONFIG.CENTRAL_LOG_ID);
+    const ss = SpreadsheetApp.openById(CONFIG.CENTRAL_LOG_ID); // ⚠️ Проверьте правильность ID
     let sheet = ss.getSheetByName(CONFIG.LOG_SHEET);
     if (!sheet) {
       sheet = ss.insertSheet(CONFIG.LOG_SHEET);
@@ -100,6 +100,7 @@ function writeToCentralLog_(row) {
     }
   } catch (err) {
     console.error('Не удалось записать в центральную таблицу:', err);
+    return false;
   }
 }
 
@@ -226,7 +227,7 @@ function exportLogToPDF() {
   const response = UrlFetchApp.fetch(exportUrl, { headers: { Authorization: 'Bearer ' + token } });
   const blob = response.getBlob().setName(`${ss.getName()}_История_${new Date().toISOString().slice(0,10)}.pdf`);
 
-  const folder = DriveApp.getFolderById(CONFIG.EXPORT_FOLDER_ID);
+  const folder = DriveApp.getFolderById(CONFIG.EXPORT_FOLDER_ID); // ⚠️ Проверьте правильность ID
   folder.createFile(blob);
 
   SpreadsheetApp.getUi().alert('PDF сохранён в папку Drive.');
@@ -242,7 +243,7 @@ function exportLogToExcel() {
   const response = UrlFetchApp.fetch(url, { headers: { Authorization: 'Bearer ' + token } });
   const blob = response.getBlob().setName(`${ss.getName()}_История_${new Date().toISOString().slice(0,10)}.xlsx`);
 
-  const folder = DriveApp.getFolderById(CONFIG.EXPORT_FOLDER_ID);
+  const folder = DriveApp.getFolderById(CONFIG.EXPORT_FOLDER_ID); // ⚠️ Проверьте правильность ID
   folder.createFile(blob);
 
   SpreadsheetApp.getUi().alert('Excel сохранён в папку Drive.');
@@ -263,7 +264,7 @@ function autoExportDailyPDF() {
   const response = UrlFetchApp.fetch(url, { headers: { Authorization: 'Bearer ' + token } });
   const blob = response.getBlob().setName(fileName);
 
-  const folder = DriveApp.getFolderById(CONFIG.EXPORT_FOLDER_ID);
+  const folder = DriveApp.getFolderById(CONFIG.EXPORT_FOLDER_ID); // ⚠️ Проверьте правильность ID
   folder.createFile(blob);
 }
 
@@ -285,7 +286,7 @@ function fetchLogData_() {
   const total = data.length;
   const users = {}, dates = {}, actions = {};
 
-  data.forEach(row) {
+  data.forEach(row => {
     const user = row[1] || 'unknown';
     const date = row[0].split(' ')[0];
     const action = row[11] || 'UNKNOWN';
@@ -307,17 +308,19 @@ function sortObj(obj) {
   return Object.fromEntries(Object.entries(obj).sort((a, b) => b[1] - a[1]));
 }
 
+// Новый способ передачи rowNumber — через PropertiesService
 function showDiff(rowNumber) {
+  PropertiesService.getScriptProperties().setProperty('diffRow', String(rowNumber));
   const html = HtmlService.createHtmlOutputFromFile('DiffDialog')
     .setTitle('Сравнение изменений')
     .setWidth(600)
     .setHeight(500);
-  ScriptApp.run = rowNumber;
   SpreadsheetApp.getUi().showModalDialog(html, 'Сравнение');
 }
 
 function getLogEntry_() {
-  const row = ScriptApp.run;
+  const rowStr = PropertiesService.getScriptProperties().getProperty('diffRow');
+  const row = rowStr ? parseInt(rowStr, 10) : 2;
   const sheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.LOG_SHEET);
   const data = sheet.getDataRange().getValues();
   const rowData = data[row - 1];
@@ -343,27 +346,4 @@ function onOpen() {
     .addItem('Экспорт в PDF', 'exportLogToPDF')
     .addItem('Экспорт в Excel', 'exportLogToExcel')
     .addItem('Просмотреть выделенное', 'viewSelectedLogEntry')
-    .addToUi();
-}
-
-function setupTrigger() {
-  const triggers = ScriptApp.getProjectTriggers();
-  if (!triggers.find(t => t.getHandlerFunction() === 'onEdit')) {
-    ScriptApp.newTrigger('onEdit').forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
-    SpreadsheetApp.getUi().alert('✅ Триггер onEdit установлен.');
-  }
-}
-
-function viewSelectedLogEntry() {
-  const sheet = SpreadsheetApp.getActiveSheet();
-  if (sheet.getName() !== CONFIG.LOG_SHEET) {
-    SpreadsheetApp.getUi().alert('Перейдите на лист "' + CONFIG.LOG_SHEET + '" и выделите строку.');
-    return;
-  }
-  const row = sheet.getSelection().getActiveRange().getRow();
-  if (row < 2) {
-    SpreadsheetApp.getUi().alert('Выберите строку с данными.');
-    return;
-  }
-  showDiff(row);
-}
+    .addTo
