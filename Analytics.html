@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f0f2f5; }
+    .chart-container { width: 600px; margin: 20px 0; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 8px; }
+    .summary { background: #e8f0fe; padding: 12px; border-radius: 8px; margin: 10px 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h2>📊 Аналитика изменений</h2>
+  <div class="summary">
+    <b>Всего записей:</b> <span id="total">0</span><br>
+    <b>Уникальных пользователей:</b> <span id="users">0</span>
+  </div>
+
+  <div class="chart-container"><canvas id="dailyChart"></canvas></div>
+  <div class="chart-container"><canvas id="userChart"></canvas></div>
+  <div class="chart-container"><canvas id="actionChart"></canvas></div>
+
+  <script>
+    google.script.run.withSuccessHandler(render).fetchLogData_();
+    function render(data) {
+      document.getElementById('total').textContent = data.total;
+      document.getElementById('users').textContent = data.uniqueUsers;
+
+      new Chart(document.getElementById('dailyChart'), {
+        type: 'bar', data: { labels: Object.keys(data.byDate), datasets: [{ label: 'Изменений в день', data: Object.values(data.byDate), backgroundColor: '#1a73e8' }] }
+      });
+      new Chart(document.getElementById('userChart'), {
+        type: 'pie', data: { labels: Object.keys(data.byUser), datasets: [{ data: Object.values(data.byUser), backgroundColor: ['#1a73e8', '#ea4335', '#fbbc05', '#34a853', '#666'] }] }
+      });
+      new Chart(document.getElementById('actionChart'), {
+        type: 'doughnut', data: { labels: Object.keys(data.byAction), datasets: [{ data: Object.values(data.byAction), backgroundColor: ['#666', '#999', '#ccc', '#333', '#555'] }] }
+      });
+    }
+  </script>
+</body>
+</html>
