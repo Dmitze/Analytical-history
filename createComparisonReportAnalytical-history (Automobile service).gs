@@ -37,8 +37,8 @@ function copyAllATTables() {
     return;
   }
   try {
-    const sourceSpreadsheetId = '1CcdvLUU5V9DgyJllttNTyLVoxIwJXILFvEOFU31W7lY';
-    const targetSpreadsheetId = '1Y_F_dYFVxJu9gWcXn59xkNLTg9rxS6WxT93rRETm-Dw';
+    const sourceSpreadsheetId = '';
+    const targetSpreadsheetId = '';
     const sourceSheetName = 'Загальна АТ';
 
     const now = new Date();
