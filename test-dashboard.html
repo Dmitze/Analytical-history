@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналітична Панель - ТЕСТ</title>
+    <style>
+        /* Копіюємо всі стилі з WebAppEnhanced.html */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .test-banner {
+            background: #ffc107;
+            color: #000;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 50px auto 0;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto auto 1fr;
+            height: calc(100vh - 70px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .btn-pdf {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+
+        .nav-section h3 {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .nav-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            padding: 12px 20px;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .quick-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .quick-filter-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .quick-filter-btn:hover {
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .quick-filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .filters input,
+        .filters select {
+            flex: 1;
+            min-width: 150px;
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-clear {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 20px 30px;
+            overflow: auto;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .record-count {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .data-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .cell-positive {
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: 600;
+        }
+
+        .cell-negative {
+            background-color: #f8d7da;
+            color: #721c24;
+            font-weight: 600;
+        }
+
+        .change-arrow {
+            font-size: 16px;
+            margin-left: 4px;
+        }
+
+        .bookmark-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+            transition: transform 0.2s;
+        }
+
+        .bookmark-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .bookmarked {
+            color: #ffc107;
+        }
+
+        .favorites-section {
+            background: #fff3cd;
+            border-bottom: 2px solid #ffc107;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .date-picker-group {
+            margin-bottom: 15px;
+        }
+
+        .date-picker-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .date-picker-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-compare {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .spinner {
+            text-align: center;
+            padding: 50px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-banner">
+        🧪 ТЕСТОВИЙ РЕЖИМ - Використовуються mock дані
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>📊 Аналітична Панель</h1>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-pdf" id="compareBtn" onclick="testApp.openComparisonModal()" style="display: none;">📊 Порівняти дати</button>
+                <button class="btn-pdf" onclick="alert('PDF експорт доступний тільки в Google Apps Script')">📥 Завантажити PDF</button>
+            </div>
+        </header>
+
+        <nav class="nav" id="navigation">
+            <!-- Буде заповнено JavaScript -->
+        </nav>
+
+        <div class="filters">
+            <div class="quick-filters" id="quickFilters" style="display: none; width: 100%; margin-bottom: 10px;">
+                <button class="quick-filter-btn" onclick="testApp.setQuickFilter('today')">Сьогодні</button>
+                <button class="quick-filter-btn" onclick="testApp.setQuickFilter('week')">Тиждень</button>
+                <button class="quick-filter-btn" onclick="testApp.setQuickFilter('month')">Місяць</button>
+                <button class="quick-filter-btn" onclick="testApp.setQuickFilter('quarter')">Квартал</button>
+            </div>
+            <input type="text" id="searchInput" placeholder="🔍 Пошук..." oninput="testApp.applyFilters()">
+            <input type="date" id="dateFilter" onchange="testApp.applyFilters()">
+            <select id="subdivisionFilter" onchange="testApp.applyFilters()">
+                <option value="">Всі підрозділи</option>
+            </select>
+            <button class="btn-clear" onclick="testApp.clearFilters()">Очистити</button>
+        </div>
+
+        <main class="content">
+            <div class="sheet-header">
+                <h2 id="sheetTitle">Оберіть лист для перегляду</h2>
+                <span id="recordCount" class="record-count hidden"></span>
+            </div>
+            <div class="table-wrapper">
+                <div id="loadingSpinner" class="spinner hidden">Завантаження...</div>
+                <table id="dataTable" class="data-table hidden">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="comparisonModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Порівняння дат</h3>
+                <button class="modal-close" onclick="testApp.closeComparisonModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="date-picker-group">
+                    <label for="compareDate1">Перша дата:</label>
+                    <input type="date" id="compareDate1">
+                </div>
+                <div class="date-picker-group">
+                    <label for="compareDate2">Друга дата:</label>
+                    <input type="date" id="compareDate2">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="testApp.closeComparisonModal()">Скасувати</button>
+                <button class="btn-compare" onclick="testApp.compareData()">Порівняти</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="test-dashboard-logic.js"></script>
+</body>
+</html>
