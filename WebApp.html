@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналітична Панель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto auto 1fr;
+            height: calc(100vh - 20px);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .btn-pdf {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Navigation */
+        .nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            overflow-x: auto;
+        }
+
+        .nav-section h3 {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .nav-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 10px;
+            padding: 12px 20px;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .filters input,
+        .filters select {
+            flex: 1;
+            min-width: 150px;
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filters input:focus,
+        .filters select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-clear {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-clear:hover {
+            background: #c82333;
+        }
+
+        /* Content */
+        .content {
+            padding: 20px 30px;
+            overflow: auto;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sheet-header h2 {
+            font-size: 22px;
+            color: #212529;
+        }
+
+        .record-count {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .data-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .data-table tbody tr:nth-child(even):hover {
+            background: #e9ecef;
+        }
+
+        /* Spinner */
+        .spinner {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Tablet */
+        @media (max-width: 1024px) {
+            .nav {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filters input,
+            .filters select {
+                width: 100%;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                border-radius: 0;
+                height: 100vh;
+            }
+
+            .header {
+                padding: 15px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header h1 {
+                font-size: 18px;
+                text-align: center;
+            }
+
+            .btn-pdf {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .nav {
+                grid-template-columns: 1fr;
+                padding: 10px;
+                gap: 15px;
+            }
+
+            .nav-section h3 {
+                font-size: 12px;
+            }
+
+            .nav-btn {
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .filters {
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .filters input,
+            .filters select {
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .btn-clear {
+                width: 100%;
+                padding: 12px;
+            }
+
+            .content {
+                padding: 10px;
+            }
+
+            .sheet-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .sheet-header h2 {
+                font-size: 18px;
+            }
+
+            .data-table {
+                font-size: 11px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+                font-size: 11px;
+            }
+
+            .record-count {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .nav-btn {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 6px 4px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📊 Аналітична Панель</h1>
+            <button class="btn-pdf" onclick="exportToPDF()">📥 Завантажити PDF</button>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-section">
+                <h3>Звіти</h3>
+                <div class="nav-buttons">
+                    <button class="nav-btn" onclick="loadSheet('РЕБ')">РЕБ</button>
+                    <button class="nav-btn" onclick="loadSheet('Речова')">Речова</button>
+                    <button class="nav-btn" onclick="loadSheet('ЕТС')">ЕТС</button>
+                    <button class="nav-btn" onclick="loadSheet('Інж')">Інж</button>
+                    <button class="nav-btn" onclick="loadSheet('СІІЗ')">СІІЗ</button>
+                    <button class="nav-btn" onclick="loadSheet('Прод')">Прод</button>
+                </div>
+            </div>
+            <div class="nav-section">
+                <h3>Історія</h3>
+                <div class="nav-buttons">
+                    <button class="nav-btn" onclick="loadSheet('Різниця Інж')">Різниця Інж</button>
+                    <button class="nav-btn" onclick="loadSheet('Різниця Прод')">Різниця Прод</button>
+                    <button class="nav-btn" onclick="loadSheet('Різниця ЕТС')">Різниця ЕТС</button>
+                    <button class="nav-btn" onclick="loadSheet('Різниця СІІЗ')">Різниця СІІЗ</button>
+                    <button class="nav-btn" onclick="loadSheet('Різниця РЕБ')">Різниця РЕБ</button>
+                    <button class="nav-btn" onclick="loadSheet('Різниця Речова')">Різниця Речова</button>
+                </div>
+            </div>
+            <div class="nav-section">
+                <h3>Архів</h3>
+                <div class="nav-buttons">
+                    <button class="nav-btn" onclick="loadSheet('ArchiveBackup')">ArchiveBackup</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Filters -->
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="🔍 Пошук..." oninput="applyFilters()">
+            <input type="date" id="dateFilter" onchange="applyFilters()">
+            <select id="subdivisionFilter" onchange="applyFilters()">
+                <option value="">Всі підрозділи</option>
+            </select>
+            <button class="btn-clear" onclick="clearFilters()">Очистити</button>
+        </div>
+
+        <!-- Content -->
+        <main class="content">
+            <div class="sheet-header">
+                <h2 id="sheetTitle">Оберіть лист для перегляду</h2>
+                <span id="recordCount" class="record-count hidden"></span>
+            </div>
+            <div class="table-wrapper">
+                <div id="loadingSpinner" class="spinner hidden">Завантаження...</div>
+                <table id="dataTable" class="data-table hidden">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentData = [];
+        let filteredData = [];
+        let currentSheet = '';
+
+        function loadSheet(sheetName) {
+            currentSheet = sheetName;
+            document.getElementById('sheetTitle').textContent = sheetName;
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('dataTable').classList.add('hidden');
+
+            // Активна кнопка
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Виклик серверної функції
+            google.script.run
+                .withSuccessHandler(displayData)
+                .withFailureHandler(showError)
+                .getSheetData(sheetName);
+        }
+
+        function displayData(data) {
+            currentData = data;
+            filteredData = data;
+
+            document.getElementById('loadingSpinner').classList.add('hidden');
+            document.getElementById('dataTable').classList.remove('hidden');
+
+            if (data.length === 0) {
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="100">Немає даних</td></tr>';
+                return;
+            }
+
+            // Заголовки
+            const thead = document.getElementById('tableHead');
+            thead.innerHTML = '<tr>' + data[0].map(cell => `<th>${cell}</th>`).join('') + '</tr>';
+
+            // Дані
+            renderTable(data.slice(1));
+
+            // Оновити підрозділи для фільтра
+            updateSubdivisions(data);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = data.map(row =>
+                '<tr>' + row.map(cell => `<td>${cell}</td>`).join('') + '</tr>'
+            ).join('');
+
+            document.getElementById('recordCount').textContent = `${data.length} записів`;
+            document.getElementById('recordCount').classList.remove('hidden');
+        }
+
+        function updateSubdivisions(data) {
+            const select = document.getElementById('subdivisionFilter');
+            const subdivisions = new Set();
+
+            // Припускаємо, що підрозділ на 3-му рядку (індекс 2)
+            if (data.length > 2) {
+                data.slice(3).forEach(row => {
+                    if (row[0]) subdivisions.add(row[0]);
+                });
+            }
+
+            select.innerHTML = '<option value="">Всі підрозділи</option>' +
+                Array.from(subdivisions).map(sub => `<option value="${sub}">${sub}</option>`).join('');
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const dateFilter = document.getElementById('dateFilter').value;
+            const subdivisionFilter = document.getElementById('subdivisionFilter').value;
+
+            filteredData = currentData.slice(1).filter(row => {
+                const matchesSearch = !searchTerm || row.some(cell =>
+                    String(cell).toLowerCase().includes(searchTerm)
+                );
+
+                const matchesDate = !dateFilter || String(row[0]).includes(dateFilter);
+
+                const matchesSubdivision = !subdivisionFilter || row[0] === subdivisionFilter;
+
+                return matchesSearch && matchesDate && matchesSubdivision;
+            });
+
+            renderTable(filteredData);
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('subdivisionFilter').value = '';
+            applyFilters();
+        }
+
+        function exportToPDF() {
+            if (!currentSheet) {
+                alert('Спочатку оберіть лист для експорту');
+                return;
+            }
+
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+
+            google.script.run
+                .withSuccessHandler(function (url) {
+                    document.getElementById('loadingSpinner').classList.add('hidden');
+                    window.open(url, '_blank');
+                })
+                .withFailureHandler(function (error) {
+                    document.getElementById('loadingSpinner').classList.add('hidden');
+                    alert('Помилка експорту: ' + error.message);
+                })
+                .exportSheetToPDF(currentSheet);
+        }
+
+        function showError(error) {
+            document.getElementById('loadingSpinner').classList.add('hidden');
+            alert('Помилка: ' + error.message);
+        }
+    </script>
+</body>
+
+</html>
