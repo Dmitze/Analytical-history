@@ -1,0 +1,2599 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналітична Панель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto auto 1fr;
+            height: calc(100vh - 20px);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .btn-pdf {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+
+        /* Navigation */
+        .nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            overflow-x: auto;
+        }
+
+        .nav-section h3 {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .nav-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 10px;
+            padding: 12px 20px;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .filters input,
+        .filters select {
+            flex: 1;
+            min-width: 150px;
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filters input:focus,
+        .filters select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-clear {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-clear:hover {
+            background: #c82333;
+        }
+
+        /* Content */
+        .content {
+            padding: 20px 30px;
+            overflow: auto;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sheet-header h2 {
+            font-size: 22px;
+            color: #212529;
+        }
+
+        .record-count {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .data-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .data-table tbody tr:nth-child(even):hover {
+            background: #e9ecef;
+        }
+
+        /* Enhanced Loading Indicators */
+        .spinner {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        /* Improved Spinner with Animation */
+        .spinner-enhanced {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            gap: 20px;
+        }
+
+        .spinner-circle {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-text {
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background: #f3f3f3;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 8px;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* Skeleton Screens */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .skeleton-table {
+            padding: 20px;
+        }
+
+        .skeleton-row {
+            height: 40px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .skeleton-header {
+            height: 50px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .skeleton-text {
+            height: 16px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-text.short {
+            width: 60%;
+        }
+
+        .skeleton-text.long {
+            width: 90%;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-overlay .spinner-enhanced {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Color coding for changes */
+        .cell-positive {
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: 600;
+        }
+
+        .cell-negative {
+            background-color: #f8d7da;
+            color: #721c24;
+            font-weight: 600;
+        }
+
+        .cell-neutral {
+            color: #6c757d;
+        }
+
+        .change-arrow {
+            font-size: 16px;
+            margin-left: 4px;
+        }
+
+        /* Quick Filters */
+        .quick-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .quick-filter-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-filter-btn:hover {
+            background: #f0f4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .quick-filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .quick-filter-btn[data-filter="clear"] {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .quick-filter-btn[data-filter="clear"]:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .quick-filter-btn[data-filter="clear"].active {
+            display: none;
+        }
+
+        /* Bookmarks */
+        .bookmark-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+            transition: transform 0.2s;
+        }
+
+        .bookmark-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .bookmarked {
+            color: #ffc107;
+        }
+
+        .favorites-section {
+            background: #fff3cd;
+            border-bottom: 2px solid #ffc107;
+        }
+
+        /* Comparison Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            color: #212529;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .date-picker-group {
+            margin-bottom: 15px;
+        }
+
+        .date-picker-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .date-picker-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-compare {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Pull-to-Refresh */
+        .pull-indicator {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            padding: 10px 20px;
+            background: var(--accent-primary, #667eea);
+            color: white;
+            border-radius: 0 0 10px 10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 9999;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .pull-indicator.ready {
+            background: #28a745;
+        }
+
+        .pull-indicator.refreshing {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: translateX(-50%) translateY(0) rotate(0deg);
+            }
+
+            to {
+                transform: translateX(-50%) translateY(0) rotate(360deg);
+            }
+        }
+
+        /* Swipe Animations */
+        @keyframes bounce-left {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(-20px);
+            }
+        }
+
+        @keyframes bounce-right {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(20px);
+            }
+        }
+
+        .bounce-left {
+            animation: bounce-left 0.3s ease-out;
+        }
+
+        .bounce-right {
+            animation: bounce-right 0.3s ease-out;
+        }
+
+        @keyframes slide-in-right {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slide-in-left {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .slide-in-right {
+            animation: slide-in-right 0.3s ease-out;
+        }
+
+        .slide-in-left {
+            animation: slide-in-left 0.3s ease-out;
+        }
+
+        /* Share Button */
+        .btn-share {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-share:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10000;
+            font-size: 14px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #28a745;
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .nav {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filters input,
+            .filters select {
+                width: 100%;
+            }
+
+            .quick-filters {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                border-radius: 0;
+                height: 100vh;
+            }
+
+            .header {
+                padding: 15px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header h1 {
+                font-size: 18px;
+                text-align: center;
+            }
+
+            .btn-pdf {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .nav {
+                grid-template-columns: 1fr;
+                padding: 10px;
+                gap: 15px;
+            }
+
+            .content {
+                padding: 10px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+                font-size: 11px;
+            }
+
+            .quick-filters {
+                gap: 6px;
+                padding: 8px;
+            }
+
+            .quick-filter-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+
+        /* Accessibility Styles */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus Indicators */
+        *:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .keyboard-focused {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Skip to main content link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            z-index: 100;
+            border-radius: 0 0 8px 0;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link">Перейти до основного вмісту</a>
+
+    <!-- Pull-to-Refresh Indicator -->
+    <div id="pullIndicator" class="pull-indicator" aria-hidden="true">
+        🔄 Потягніть для оновлення...
+    </div>
+
+    <div class="container"></div>
+    <header class="header" role="banner"></header>
+    <h1>📊 Аналітична Панель</h1>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;" role="toolbar" aria-label="Дії з даними"></div>
+    <button class="btn-pdf" id="compareBtn" onclick="app.openComparisonModal()" style="display: none;"
+        aria-label="Порівняти дві дати">
+        <span aria-hidden="true">📊</span> Порівняти дати
+    </button>
+    <button class="btn-share" id="shareBtn" onclick="app.shareLink()"
+        aria-label="Поділитися посиланням на поточний стан">
+        <span aria-hidden="true">🔗</span> Поділитися
+    </button>
+    <button class="btn-pdf" onclick="app.exportToPDF()" aria-label="Завантажити поточний лист як PDF">
+        <span aria-hidden="true">📥</span> Завантажити PDF
+    </button>
+    </div>
+    </header>
+
+    <nav class="nav" role="navigation" aria-label="Навігація по листах таблиці">
+        <div class="nav-section">
+            <h3 id="reports-heading">Звіти</h3>
+            <div class="nav-buttons" role="list" aria-labelledby="reports-heading">
+                <button class="nav-btn" onclick="app.loadSheet('РЕБ')" role="listitem"
+                    aria-label="Відкрити лист РЕБ">РЕБ</button>
+                <button class="nav-btn" onclick="app.loadSheet('Речова')" role="listitem"
+                    aria-label="Відкрити лист Речова">Речова</button>
+                <button class="nav-btn" onclick="app.loadSheet('ЕТС')" role="listitem"
+                    aria-label="Відкрити лист ЕТС">ЕТС</button>
+                <button class="nav-btn" onclick="app.loadSheet('Інж')" role="listitem"
+                    aria-label="Відкрити лист Інж">Інж</button>
+                <button class="nav-btn" onclick="app.loadSheet('СІІЗ')" role="listitem"
+                    aria-label="Відкрити лист СІІЗ">СІІЗ</button>
+                <button class="nav-btn" onclick="app.loadSheet('Прод')" role="listitem"
+                    aria-label="Відкрити лист Прод">Прод</button>
+            </div>
+        </div>
+        <div class="nav-section">
+            <h3 id="history-heading">Історія</h3>
+            <div class="nav-buttons" role="list" aria-labelledby="history-heading">
+                <button class="nav-btn" onclick="app.loadSheet('Різниця Інж')" role="listitem"
+                    aria-label="Відкрити історичний лист Різниця Інж">Різниця Інж</button>
+                <button class="nav-btn" onclick="app.loadSheet('Різниця Прод')" role="listitem"
+                    aria-label="Відкрити історичний лист Різниця Прод">Різниця Прод</button>
+                <button class="nav-btn" onclick="app.loadSheet('Різниця ЕТС')" role="listitem"
+                    aria-label="Відкрити історичний лист Різниця ЕТС">Різниця ЕТС</button>
+                <button class="nav-btn" onclick="app.loadSheet('Різниця СІІЗ')" role="listitem"
+                    aria-label="Відкрити історичний лист Різниця СІІЗ">Різниця СІІЗ</button>
+                <button class="nav-btn" onclick="app.loadSheet('Різниця РЕБ')" role="listitem"
+                    aria-label="Відкрити історичний лист Різниця РЕБ">Різниця РЕБ</button>
+                <button class="nav-btn" onclick="app.loadSheet('Різниця Речова')" role="listitem"
+                    aria-label="Відкрити історичний лист Різниця Речова">Різниця Речова</button>
+            </div>
+        </div>
+        <div class="nav-section">
+            <h3 id="archive-heading">Архів</h3>
+            <div class="nav-buttons" role="list" aria-labelledby="archive-heading">
+                <button class="nav-btn" onclick="app.loadSheet('ArchiveBackup')" role="listitem"
+                    aria-label="Відкрити архівний лист ArchiveBackup">ArchiveBackup</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="filters" role="search" aria-label="Фільтри та пошук даних">
+        <div class="quick-filters" id="quickFilters" style="display: none; width: 100%; margin-bottom: 10px;"
+            role="group" aria-label="Швидкі фільтри за датами">
+            <button class="quick-filter-btn" data-filter="today" onclick="app.setQuickFilter('today')"
+                aria-label="Фільтрувати дані за сьогодні" aria-pressed="false">
+                <span aria-hidden="true">📅</span> Сьогодні
+            </button>
+            <button class="quick-filter-btn" data-filter="week" onclick="app.setQuickFilter('week')"
+                aria-label="Фільтрувати дані за тиждень" aria-pressed="false">
+                <span aria-hidden="true">📆</span> Тиждень
+            </button>
+            <button class="quick-filter-btn" data-filter="month" onclick="app.setQuickFilter('month')"
+                aria-label="Фільтрувати дані за місяць" aria-pressed="false">
+                <span aria-hidden="true">📊</span> Місяць
+            </button>
+            <button class="quick-filter-btn" data-filter="quarter" onclick="app.setQuickFilter('quarter')"
+                aria-label="Фільтрувати дані за квартал" aria-pressed="false">
+                <span aria-hidden="true">📈</span> Квартал
+            </button>
+            <button class="quick-filter-btn" data-filter="clear" onclick="app.clearQuickFilter()"
+                aria-label="Скинути швидкий фільтр">
+                <span aria-hidden="true">✖</span> Скинути
+            </button>
+        </div>
+        <label for="searchInput" class="sr-only">Пошук по таблиці</label>
+        <input type="text" id="searchInput" placeholder="🔍 Пошук..." oninput="app.applyFilters()"
+            aria-label="Пошук по таблиці">
+        <label for="dateFilter" class="sr-only">Фільтр за датою</label>
+        <input type="date" id="dateFilter" onchange="app.applyFilters()" aria-label="Фільтр за датою">
+        <label for="subdivisionFilter" class="sr-only">Фільтр за підрозділом</label>
+        <select id="subdivisionFilter" onchange="app.applyFilters()" aria-label="Фільтр за підрозділом">
+            <option value="">Всі підрозділи</option>
+        </select>
+        <button class="btn-clear" onclick="app.clearFilters()" aria-label="Очистити всі фільтри">Очистити</button>
+    </div>
+
+    <main class="content" role="main" id="main-content"></main>
+    <div class="sheet-header">
+        <h2 id="sheetTitle">Оберіть лист для перегляду</h2>
+        <span id="recordCount" class="record-count hidden" role="status" aria-live="polite"></span>
+    </div>
+    <div class="table-wrapper">
+        <!-- Enhanced Loading Spinner -->
+        <div id="loadingSpinner" class="spinner-enhanced hidden">
+            <div class="spinner-circle"></div>
+            <div class="spinner-text">Завантаження даних...</div>
+            <div class="progress-container hidden" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text hidden" id="progressText"></div>
+        </div>
+
+        <!-- Skeleton Screen for Table -->
+        <div id="skeletonScreen" class="skeleton-table hidden">
+            <div class="skeleton skeleton-header"></div>
+            <div class="skeleton skeleton-row"></div>
+            <div class="skeleton skeleton-row"></div>
+            <div class="skeleton skeleton-row"></div>
+            <div class="skeleton skeleton-row"></div>
+            <div class="skeleton skeleton-row"></div>
+            <div class="skeleton skeleton-row"></div>
+            <div class="skeleton skeleton-row"></div>
+            <div class="skeleton skeleton-row"></div>
+        </div>
+
+        <table id="dataTable" class="data-table hidden" role="grid" aria-label="Таблиця з даними">
+            <caption class="sr-only">Дані аналітичної панелі</caption>
+            <thead id="tableHead" role="rowgroup"></thead>
+            <tbody id="tableBody" role="rowgroup"></tbody>
+        </table>
+    </div>
+    </main>
+    </div>
+
+    <!-- Comparison Modal -->
+    <div id="comparisonModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
+        aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Порівняння дат</h3>
+                <button class="modal-close" onclick="app.closeComparisonModal()"
+                    aria-label="Закрити модальне вікно">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="date-picker-group">
+                    <label for="compareDate1">Перша дата:</label>
+                    <input type="date" id="compareDate1" aria-required="true">
+                </div>
+                <div class="date-picker-group">
+                    <label for="compareDate2">Друга дата:</label>
+                    <input type="date" id="compareDate2" aria-required="true">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="app.closeComparisonModal()"
+                    aria-label="Скасувати порівняння">Скасувати</button>
+                <button class="btn-compare" onclick="app.compareData()"
+                    aria-label="Порівняти вибрані дати">Порівняти</button>
+            </div>
+        </div>
+    </div>
+
+    <script></script>
+
+    // ============================================
+    // CORE MODULES
+    // ============================================
+
+    /**
+    * StateManager - Централізоване управління станом додатку
+    */
+    class StateManager {
+    constructor() {
+    this.state = {
+    currentSheet: null,
+    currentData: [],
+    filteredData: [],
+    filters: {
+    search: '',
+    dateRange: null,
+    subdivision: '',
+    quickFilter: null
+    },
+    bookmarks: [],
+    theme: 'light',
+    isOnline: navigator.onLine,
+    comparison: null
+    };
+    this.subscribers = [];
+    }
+
+    setState(updates) {
+    this.state = { ...this.state, ...updates };
+    this.notifySubscribers();
+    }
+
+    subscribe(callback) {
+    this.subscribers.push(callback);
+    return () => {
+    this.subscribers = this.subscribers.filter(cb => cb !== callback);
+    };
+    }
+
+    notifySubscribers() {
+    this.subscribers.forEach(callback => callback(this.state));
+    }
+
+    getState() {
+    return { ...this.state };
+    }
+    }
+
+    /**
+    * CacheManager - Управління кешуванням з TTL та LRU eviction
+    */
+    class CacheManager {
+    constructor() {
+    this.CACHE_PREFIX = 'dashboard_cache_';
+    this.CACHE_TTL = 24 * 60 * 60 * 1000; // 24 години
+    this.MAX_CACHE_SIZE = 50;
+    }
+
+    set(key, data) {
+    const cacheEntry = {
+    data: data,
+    timestamp: Date.now(),
+    accessCount: 0
+    };
+
+    try {
+    localStorage.setItem(
+    this.CACHE_PREFIX + key,
+    JSON.stringify(cacheEntry)
+    );
+    this.enforceMaxSize();
+    } catch (e) {
+    if (e.name === 'QuotaExceededError') {
+    this.evictLRU();
+    this.set(key, data);
+    }
+    }
+    }
+
+    get(key) {
+    const cached = localStorage.getItem(this.CACHE_PREFIX + key);
+    if (!cached) return null;
+
+    const entry = JSON.parse(cached);
+
+    if (Date.now() - entry.timestamp > this.CACHE_TTL) {
+    this.remove(key);
+    return null;
+    }
+
+    entry.accessCount++;
+    entry.lastAccess = Date.now();
+    localStorage.setItem(
+    this.CACHE_PREFIX + key,
+    JSON.stringify(entry)
+    );
+
+    return entry.data;
+    }
+
+    evictLRU() {
+    const entries = this.getAllEntries();
+    if (entries.length === 0) return;
+
+    entries.sort((a, b) => {
+    if (a.accessCount !== b.accessCount) {
+    return a.accessCount - b.accessCount;
+    }
+    return a.lastAccess - b.lastAccess;
+    });
+
+    const toRemove = Math.ceil(entries.length * 0.2);
+    for (let i = 0; i < toRemove; i++) { this.remove(entries[i].key); } } getAllEntries() { const entries=[]; for (let
+        i=0; i < localStorage.length; i++) { const key=localStorage.key(i); if (key.startsWith(this.CACHE_PREFIX)) {
+        const entry=JSON.parse(localStorage.getItem(key)); entries.push({ key: key.replace(this.CACHE_PREFIX, '' ),
+        ...entry }); } } return entries; } enforceMaxSize() { const entries=this.getAllEntries(); if (entries.length>
+        this.MAX_CACHE_SIZE) {
+        this.evictLRU();
+        }
+        }
+
+        remove(key) {
+        localStorage.removeItem(this.CACHE_PREFIX + key);
+        }
+
+        clear() {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) { const key=localStorage.key(i); if
+            (key.startsWith(this.CACHE_PREFIX)) { keys.push(key); } } keys.forEach(key=> localStorage.removeItem(key));
+            }
+            }
+
+            /**
+            * APIClient - Обгортка для Google Apps Script API
+            */
+            class APIClient {
+            constructor(cacheManager) {
+            this.cacheManager = cacheManager;
+            }
+
+            async getSheetData(sheetName, useCache = true) {
+            if (useCache) {
+            const cached = this.cacheManager.get(sheetName);
+            if (cached) {
+            console.log(`Loaded ${sheetName} from cache`);
+            return cached;
+            }
+            }
+
+            return new Promise((resolve, reject) => {
+            google.script.run
+            .withSuccessHandler((data) => {
+            this.cacheManager.set(sheetName, data);
+            resolve(data);
+            })
+            .withFailureHandler(reject)
+            .getSheetData(sheetName);
+            });
+            }
+
+            async exportSheetToPDF(sheetName) {
+            return new Promise((resolve, reject) => {
+            google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+            .exportSheetToPDF(sheetName);
+            });
+            }
+            }
+
+
+            // ============================================
+            // FEATURE MODULES
+            // ============================================
+
+            /**
+            * FilterManager - Управління фільтрами з підтримкою швидких фільтрів
+            */
+            class FilterManager {
+            constructor(stateManager) {
+            this.stateManager = stateManager;
+            this.quickFilters = {
+            'today': () => this.filterByDays(0),
+            'week': () => this.filterByDays(7),
+            'month': () => this.filterByDays(30),
+            'quarter': () => this.filterByDays(90)
+            };
+            }
+
+            applyFilters(data) {
+            const state = this.stateManager.getState();
+            let filtered = [...data];
+
+            // Швидкий фільтр за датою
+            if (state.filters.quickFilter) {
+            const filterFn = this.quickFilters[state.filters.quickFilter];
+            if (filterFn) {
+            filtered = filterFn(filtered);
+            }
+            }
+
+            // Пошук
+            if (state.filters.search) {
+            filtered = this.filterBySearch(filtered, state.filters.search);
+            }
+
+            // Діапазон дат
+            if (state.filters.dateRange) {
+            filtered = this.filterByDateRange(filtered, state.filters.dateRange);
+            }
+
+            // Підрозділ
+            if (state.filters.subdivision) {
+            filtered = this.filterBySubdivision(filtered, state.filters.subdivision);
+            }
+
+            return filtered;
+            }
+
+            filterByDays(days) {
+            return (data) => {
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days);
+
+            return data.filter(row => {
+            const rowDate = this.parseDate(row[0]);
+            return rowDate && rowDate >= cutoffDate;
+            });
+            };
+            }
+
+            filterBySearch(data, searchTerm) {
+            const term = searchTerm.toLowerCase();
+            return data.filter(row =>
+            row.some(cell => String(cell).toLowerCase().includes(term))
+            );
+            }
+
+            filterByDateRange(data, dateRange) {
+            const { start, end } = dateRange;
+            return data.filter(row => {
+            const rowDate = this.parseDate(row[0]);
+            if (!rowDate) return false;
+            return rowDate >= start && rowDate <= end; }); } filterBySubdivision(data, subdivision) { return
+                data.filter(row=> row[0] === subdivision);
+                }
+
+                parseDate(dateStr) {
+                const formats = [
+                /(\d{2})\.(\d{2})\.(\d{4})/,
+                /(\d{4})-(\d{2})-(\d{2})/,
+                ];
+
+                for (const format of formats) {
+                const match = String(dateStr).match(format);
+                if (match) {
+                if (format === formats[0]) {
+                return new Date(match[3], match[2] - 1, match[1]);
+                } else {
+                return new Date(match[1], match[2] - 1, match[3]);
+                }
+                }
+                }
+
+                return null;
+                }
+                }
+
+                /**
+                * VisualizationManager - Кольорове кодування та візуальні індикатори
+                */
+                class VisualizationManager {
+                constructor() {
+                this.icons = {
+                'РЕБ': '📊',
+                'Речова': '📦',
+                'ЕТС': '⚡',
+                'Інж': '🔧',
+                'СІІЗ': '🛡️',
+                'Прод': '🍎',
+                'Різниця Інж': '📈',
+                'Різниця Прод': '📉',
+                'Різниця ЕТС': '⚡📊',
+                'Різниця СІІЗ': '🛡️📊',
+                'Різниця РЕБ': '📊📈',
+                'Різниця Речова': '📦📊',
+                'ArchiveBackup': '🗄️'
+                };
+                }
+
+                getSheetIcon(sheetName) {
+                return this.icons[sheetName] || '📄';
+                }
+
+                colorizeChange(value, previousValue) {
+                if (!previousValue || value === previousValue) {
+                return { color: '#6c757d', arrow: '', class: 'neutral' };
+                }
+
+                const numValue = parseFloat(value);
+                const numPrevious = parseFloat(previousValue);
+
+                if (isNaN(numValue) || isNaN(numPrevious)) {
+                return { color: '#6c757d', arrow: '', class: 'neutral' };
+                }
+
+                const diff = numValue - numPrevious;
+                const percentChange = Math.abs((diff / numPrevious) * 100);
+
+                if (diff > 0) {
+                const intensity = Math.min(percentChange / 10, 1);
+                const color = this.interpolateColor('#d4edda', '#28a745', intensity);
+                return {
+                color: color,
+                arrow: '↑',
+                class: 'positive',
+                change: diff,
+                percent: percentChange
+                };
+                } else if (diff < 0) { const intensity=Math.min(percentChange / 10, 1); const
+                    color=this.interpolateColor('#f8d7da', '#dc3545' , intensity); return { color: color, arrow: '↓' ,
+                    class: 'negative' , change: diff, percent: percentChange }; } return { color: '#6c757d' , arrow: ''
+                    , class: 'neutral' }; } interpolateColor(color1, color2, factor) { const c1=this.hexToRgb(color1);
+                    const c2=this.hexToRgb(color2); const r=Math.round(c1.r + factor * (c2.r - c1.r)); const
+                    g=Math.round(c1.g + factor * (c2.g - c1.g)); const b=Math.round(c1.b + factor * (c2.b - c1.b));
+                    return this.rgbToHex(r, g, b); } hexToRgb(hex) { const
+                    result=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return result ? { r:
+                    parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null; }
+                    rgbToHex(r, g, b) { return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1); } }
+                    /** * BookmarkManager - Управління закладками */ class BookmarkManager { constructor(stateManager) {
+                    this.stateManager=stateManager; this.STORAGE_KEY='dashboard_bookmarks' ; this.loadBookmarks(); }
+                    loadBookmarks() { const saved=localStorage.getItem(this.STORAGE_KEY); const bookmarks=saved ?
+                    JSON.parse(saved) : []; this.stateManager.setState({ bookmarks }); } saveBookmarks(bookmarks) {
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(bookmarks)); this.stateManager.setState({
+                    bookmarks }); } toggle(sheetName) { const state=this.stateManager.getState(); const
+                    bookmarks=[...state.bookmarks]; const index=bookmarks.indexOf(sheetName); if (index> -1) {
+                    bookmarks.splice(index, 1);
+                    } else {
+                    bookmarks.push(sheetName);
+                    }
+
+                    this.saveBookmarks(bookmarks);
+                    return index === -1;
+                    }
+
+                    isBookmarked(sheetName) {
+                    const state = this.stateManager.getState();
+                    return state.bookmarks.includes(sheetName);
+                    }
+
+                    getBookmarks() {
+                    const state = this.stateManager.getState();
+                    return state.bookmarks;
+                    }
+                    }
+
+                    /**
+                    * ComparisonManager - Порівняння даних між датами
+                    */
+                    class ComparisonManager {
+                    constructor(stateManager) {
+                    this.stateManager = stateManager;
+                    }
+
+                    compare(data, date1, date2) {
+                    const rows1 = this.findRowsByDate(data, date1);
+                    const rows2 = this.findRowsByDate(data, date2);
+
+                    if (!rows1 || !rows2) {
+                    throw new Error('Дані для однієї з дат не знайдено');
+                    }
+
+                    return this.calculateDifferences(rows1, rows2);
+                    }
+
+                    findRowsByDate(data, targetDate) {
+                    return data.find(row => {
+                    const rowDate = this.parseDate(row[0]);
+                    return rowDate && this.isSameDay(rowDate, targetDate);
+                    });
+                    }
+
+                    calculateDifferences(row1, row2) {
+                    const differences = [];
+
+                    for (let i = 0; i < Math.max(row1.length, row2.length); i++) { const val1=row1[i]; const
+                        val2=row2[i]; const num1=parseFloat(val1); const num2=parseFloat(val2); if (!isNaN(num1) &&
+                        !isNaN(num2)) { const diff=num2 - num1; const percent=num1 !==0 ? ((diff / num1) *
+                        100).toFixed(2) : 'N/A' ; differences.push({ column: i, value1: val1, value2: val2, difference:
+                        diff, percentChange: percent, direction: diff> 0 ? 'up' : diff < 0 ? 'down' : 'same' }); } else
+                            { differences.push({ column: i, value1: val1, value2: val2, difference: null, percentChange:
+                            null, direction: 'same' }); } } return differences; } parseDate(dateStr) { const formats=[
+                            /(\d{2})\.(\d{2})\.(\d{4})/, /(\d{4})-(\d{2})-(\d{2})/, ]; for (const format of formats) {
+                            const match=String(dateStr).match(format); if (match) { if (format===formats[0]) { return
+                            new Date(match[3], match[2] - 1, match[1]); } else { return new Date(match[1], match[2] - 1,
+                            match[3]); } } } return null; } isSameDay(date1, date2) { return
+                            date1.getFullYear()===date2.getFullYear() && date1.getMonth()===date2.getMonth() &&
+                            date1.getDate()===date2.getDate(); } } /** * LazyLoader - Віртуалізація таблиці для великих
+                            датасетів */ class LazyLoader { constructor(containerSelector, visualizationManager) {
+                            this.container=document.querySelector(containerSelector);
+                            this.visualizationManager=visualizationManager; this.rowHeight=40; this.visibleRows=50;
+                            this.buffer=10; this.allData=[]; this.headers=[]; this.renderedRange={ start: 0, end: 0 };
+                            this.isHistorySheet=false; this.enabled=false; } setData(data, headers,
+                            isHistorySheet=false) { this.allData=data; this.headers=headers;
+                            this.isHistorySheet=isHistorySheet; // Увімкнути lazy loading тільки для великих датасетів
+                            this.enabled=data.length> 100;
+
+                            if (this.enabled) {
+                            this.initScrollListener();
+                            this.updateVisibleRows();
+                            } else {
+                            this.renderAll();
+                            }
+                            }
+
+                            initScrollListener() {
+                            if (this.scrollListener) {
+                            this.container.removeEventListener('scroll', this.scrollListener);
+                            }
+
+                            this.scrollListener = this.throttle(() => {
+                            this.updateVisibleRows();
+                            }, 100);
+
+                            this.container.addEventListener('scroll', this.scrollListener, { passive: true });
+                            }
+
+                            updateVisibleRows() {
+                            const scrollTop = this.container.scrollTop;
+                            const containerHeight = this.container.clientHeight;
+
+                            const startIndex = Math.max(
+                            0,
+                            Math.floor(scrollTop / this.rowHeight) - this.buffer
+                            );
+                            const endIndex = Math.min(
+                            this.allData.length,
+                            Math.ceil((scrollTop + containerHeight) / this.rowHeight) + this.buffer
+                            );
+
+                            if (startIndex !== this.renderedRange.start ||
+                            endIndex !== this.renderedRange.end) {
+                            this.renderRows(startIndex, endIndex);
+                            this.renderedRange = { start: startIndex, end: endIndex };
+                            }
+                            }
+
+                            renderRows(start, end) {
+                            const tbody = document.querySelector('#dataTable tbody');
+                            const fragment = document.createDocumentFragment();
+
+                            // Spacer зверху
+                            if (start > 0) {
+                            const topSpacer = document.createElement('tr');
+                            const td = document.createElement('td');
+                            td.colSpan = this.headers.length;
+                            td.style.height = `${start * this.rowHeight}px`;
+                            td.style.padding = '0';
+                            topSpacer.appendChild(td);
+                            fragment.appendChild(topSpacer);
+                            }
+
+                            // Видимі рядки
+                            for (let i = start; i < end; i++) { const row=this.createRow(this.allData[i], i);
+                                fragment.appendChild(row); } // Spacer знизу const remainingRows=this.allData.length -
+                                end; if (remainingRows> 0) {
+                                const bottomSpacer = document.createElement('tr');
+                                const td = document.createElement('td');
+                                td.colSpan = this.headers.length;
+                                td.style.height = `${remainingRows * this.rowHeight}px`;
+                                td.style.padding = '0';
+                                bottomSpacer.appendChild(td);
+                                fragment.appendChild(bottomSpacer);
+                                }
+
+                                tbody.innerHTML = '';
+                                tbody.appendChild(fragment);
+                                }
+
+                                renderAll() {
+                                const tbody = document.querySelector('#dataTable tbody');
+                                const fragment = document.createDocumentFragment();
+
+                                this.allData.forEach((rowData, index) => {
+                                const row = this.createRow(rowData, index);
+                                fragment.appendChild(row);
+                                });
+
+                                tbody.innerHTML = '';
+                                tbody.appendChild(fragment);
+                                }
+
+                                createRow(rowData, rowIndex) {
+                                const tr = document.createElement('tr');
+
+                                rowData.forEach((cell, colIndex) => {
+                                const td = document.createElement('td');
+
+                                if (this.isHistorySheet && colIndex > 0 && rowIndex > 0) {
+                                const previousValue = this.allData[rowIndex - 1][colIndex];
+                                const colorInfo = this.visualizationManager.colorizeChange(cell, previousValue);
+
+                                if (colorInfo.class !== 'neutral') {
+                                td.className = `cell-${colorInfo.class}`;
+                                td.style.backgroundColor = colorInfo.color;
+                                td.innerHTML = `${cell} <span class="change-arrow">${colorInfo.arrow}</span>`;
+                                } else {
+                                td.textContent = cell;
+                                }
+                                } else {
+                                td.textContent = cell;
+                                }
+
+                                tr.appendChild(td);
+                                });
+
+                                return tr;
+                                }
+
+                                throttle(func, limit) {
+                                let inThrottle;
+                                return function(...args) {
+                                if (!inThrottle) {
+                                func.apply(this, args);
+                                inThrottle = true;
+                                setTimeout(() => inThrottle = false, limit);
+                                }
+                                };
+                                }
+
+                                destroy() {
+                                if (this.scrollListener) {
+                                this.container.removeEventListener('scroll', this.scrollListener);
+                                }
+                                }
+                                }
+
+                                /**
+                                * PullToRefreshHandler - Обробка жесту pull-to-refresh
+                                */
+                                class PullToRefreshHandler {
+                                constructor(onRefresh) {
+                                this.onRefresh = onRefresh;
+                                this.threshold = 80;
+                                this.maxPull = 120;
+                                this.startY = 0;
+                                this.currentY = 0;
+                                this.pulling = false;
+                                this.refreshing = false;
+
+                                this.init();
+                                }
+
+                                init() {
+                                if (!('ontouchstart' in window)) return;
+
+                                const container = document.querySelector('.content');
+
+                                container.addEventListener('touchstart', (e) => {
+                                if (container.scrollTop === 0) {
+                                this.startY = e.touches[0].clientY;
+                                this.pulling = true;
+                                }
+                                }, { passive: true });
+
+                                container.addEventListener('touchmove', (e) => {
+                                if (!this.pulling || this.refreshing) return;
+
+                                this.currentY = e.touches[0].clientY;
+                                const pullDistance = Math.min(
+                                this.currentY - this.startY,
+                                this.maxPull
+                                );
+
+                                if (pullDistance > 0) {
+                                this.updateIndicator(pullDistance);
+                                }
+                                }, { passive: true });
+
+                                container.addEventListener('touchend', () => {
+                                if (!this.pulling || this.refreshing) return;
+
+                                const pullDistance = this.currentY - this.startY;
+
+                                if (pullDistance > this.threshold) {
+                                this.triggerRefresh();
+                                } else {
+                                this.resetIndicator();
+                                }
+
+                                this.pulling = false;
+                                }, { passive: true });
+                                }
+
+                                updateIndicator(distance) {
+                                const indicator = document.getElementById('pullIndicator');
+                                const progress = Math.min(distance / this.threshold, 1);
+
+                                indicator.style.transform = `translateY(${distance}px)`;
+                                indicator.style.opacity = progress;
+
+                                if (progress >= 1) {
+                                indicator.classList.add('ready');
+                                indicator.textContent = '🔄 Відпустіть для оновлення...';
+                                } else {
+                                indicator.classList.remove('ready');
+                                indicator.textContent = '🔄 Потягніть для оновлення...';
+                                }
+                                }
+
+                                async triggerRefresh() {
+                                this.refreshing = true;
+                                const indicator = document.getElementById('pullIndicator');
+                                indicator.classList.add('refreshing');
+                                indicator.textContent = '⏳ Оновлення...';
+
+                                try {
+                                await this.onRefresh();
+                                } finally {
+                                setTimeout(() => {
+                                this.resetIndicator();
+                                this.refreshing = false;
+                                }, 500);
+                                }
+                                }
+
+                                resetIndicator() {
+                                const indicator = document.getElementById('pullIndicator');
+                                indicator.style.transform = 'translateY(0)';
+                                indicator.style.opacity = '0';
+                                indicator.classList.remove('ready', 'refreshing');
+                                indicator.textContent = '🔄 Потягніть для оновлення...';
+                                }
+                                }
+
+                                /**
+                                * NavigationManager - Управління навігацією з свайпами
+                                */
+                                class NavigationManager {
+                                constructor(stateManager, loadSheetCallback) {
+                                this.stateManager = stateManager;
+                                this.loadSheetCallback = loadSheetCallback;
+                                this.sheets = [
+                                'РЕБ', 'Речова', 'ЕТС', 'Інж', 'СІІЗ', 'Прод',
+                                'Різниця Інж', 'Різниця Прод', 'Різниця ЕТС',
+                                'Різниця СІІЗ', 'Різниця РЕБ', 'Різниця Речова',
+                                'ArchiveBackup'
+                                ];
+                                this.currentIndex = 0;
+                                this.initGestures();
+                                this.initKeyboard();
+                                }
+
+                                initGestures() {
+                                if (!('ontouchstart' in window)) return;
+
+                                let touchStartX = 0;
+                                let touchEndX = 0;
+                                let touchStartY = 0;
+                                let touchEndY = 0;
+                                const threshold = 50;
+
+                                const content = document.querySelector('.content');
+
+                                content.addEventListener('touchstart', (e) => {
+                                touchStartX = e.changedTouches[0].screenX;
+                                touchStartY = e.changedTouches[0].screenY;
+                                }, { passive: true });
+
+                                content.addEventListener('touchend', (e) => {
+                                touchEndX = e.changedTouches[0].screenX;
+                                touchEndY = e.changedTouches[0].screenY;
+
+                                const diffX = touchStartX - touchEndX;
+                                const diffY = touchStartY - touchEndY;
+
+                                // Перевірка що це горизонтальний свайп
+                                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > threshold) {
+                                this.handleSwipe(touchStartX, touchEndX, threshold);
+                                }
+                                }, { passive: true });
+                                }
+
+                                handleSwipe(startX, endX, threshold) {
+                                const diff = startX - endX;
+
+                                if (Math.abs(diff) < threshold) return; if (diff> 0) {
+                                    this.next();
+                                    } else {
+                                    this.previous();
+                                    }
+                                    }
+
+                                    initKeyboard() {
+                                    document.addEventListener('keydown', (e) => {
+                                    if (e.key === 'ArrowLeft') {
+                                    this.previous();
+                                    } else if (e.key === 'ArrowRight') {
+                                    this.next();
+                                    }
+                                    });
+                                    }
+
+                                    next() {
+                                    const state = this.stateManager.getState();
+                                    if (!state.currentSheet) return;
+
+                                    this.currentIndex = this.sheets.indexOf(state.currentSheet);
+
+                                    if (this.currentIndex < this.sheets.length - 1) { this.currentIndex++;
+                                        this.navigateTo(this.sheets[this.currentIndex]); } else {
+                                        this.showBounceEffect('right'); } } previous() { const
+                                        state=this.stateManager.getState(); if (!state.currentSheet) return;
+                                        this.currentIndex=this.sheets.indexOf(state.currentSheet); if
+                                        (this.currentIndex> 0) {
+                                        this.currentIndex--;
+                                        this.navigateTo(this.sheets[this.currentIndex]);
+                                        } else {
+                                        this.showBounceEffect('left');
+                                        }
+                                        }
+
+                                        navigateTo(sheetName) {
+                                        const container = document.querySelector('.content');
+                                        container.classList.add('slide-in-right');
+
+                                        setTimeout(() => {
+                                        container.classList.remove('slide-in-right');
+                                        }, 300);
+
+                                        this.loadSheetCallback(sheetName);
+                                        }
+
+                                        showBounceEffect(direction) {
+                                        const container = document.querySelector('.container');
+                                        container.classList.add(`bounce-${direction}`);
+                                        setTimeout(() => {
+                                        container.classList.remove(`bounce-${direction}`);
+                                        }, 300);
+                                        }
+                                        }
+
+                                        /**
+                                        * ShareManager - Генерація та обробка посилань
+                                        */
+                                        class ShareManager {
+                                        constructor(stateManager) {
+                                        this.stateManager = stateManager;
+                                        }
+
+                                        generateShareLink() {
+                                        const state = this.stateManager.getState();
+                                        const params = new URLSearchParams();
+
+                                        if (state.currentSheet) {
+                                        params.set('sheet', state.currentSheet);
+                                        }
+
+                                        if (state.filters.search) {
+                                        params.set('search', state.filters.search);
+                                        }
+
+                                        if (state.filters.quickFilter) {
+                                        params.set('filter', state.filters.quickFilter);
+                                        }
+
+                                        if (state.filters.subdivision) {
+                                        params.set('subdivision', state.filters.subdivision);
+                                        }
+
+                                        const url =
+                                        `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+                                        return url;
+                                        }
+
+                                        async copyToClipboard(text) {
+                                        try {
+                                        await navigator.clipboard.writeText(text);
+                                        return true;
+                                        } catch (err) {
+                                        const textarea = document.createElement('textarea');
+                                        textarea.value = text;
+                                        textarea.style.position = 'fixed';
+                                        textarea.style.opacity = '0';
+                                        document.body.appendChild(textarea);
+                                        textarea.select();
+                                        const success = document.execCommand('copy');
+                                        document.body.removeChild(textarea);
+                                        return success;
+                                        }
+                                        }
+
+                                        parseShareLink() {
+                                        const params = new URLSearchParams(window.location.search);
+                                        const config = {};
+
+                                        if (params.has('sheet')) {
+                                        config.sheet = params.get('sheet');
+                                        }
+
+                                        if (params.has('search')) {
+                                        config.search = params.get('search');
+                                        }
+
+                                        if (params.has('filter')) {
+                                        config.quickFilter = params.get('filter');
+                                        }
+
+                                        if (params.has('subdivision')) {
+                                        config.subdivision = params.get('subdivision');
+                                        }
+
+                                        return config;
+                                        }
+
+                                        async share() {
+                                        const url = this.generateShareLink();
+
+                                        if (navigator.share) {
+                                        try {
+                                        await navigator.share({
+                                        title: 'Аналітична Панель',
+                                        text: `Перегляньте дані: ${this.stateManager.getState().currentSheet}`,
+                                        url: url
+                                        });
+                                        return { success: true, method: 'native' };
+                                        } catch (err) {
+                                        if (err.name !== 'AbortError') {
+                                        console.error('Share failed:', err);
+                                        }
+                                        }
+                                        }
+
+                                        const copied = await this.copyToClipboard(url);
+                                        return { success: copied, method: 'clipboard' };
+                                        }
+
+                                        showToast(message, type = 'success') {
+                                        const toast = document.createElement('div');
+                                        toast.className = `toast ${type}`;
+                                        toast.textContent = message;
+                                        document.body.appendChild(toast);
+
+                                        setTimeout(() => {
+                                        toast.classList.add('show');
+                                        }, 100);
+
+                                        setTimeout(() => {
+                                        toast.classList.remove('show');
+                                        setTimeout(() => toast.remove(), 300);
+                                        }, 3000);
+                                        }
+                                        }
+
+                                        /**
+                                        * KeyboardNavigationManager - Навігація з клавіатури
+                                        */
+                                        class KeyboardNavigationManager {
+                                        constructor() {
+                                        this.focusableElements = [];
+                                        this.currentFocusIndex = -1;
+                                        this.trapFocus = false;
+                                        this.init();
+                                        }
+
+                                        init() {
+                                        document.addEventListener('keydown', (e) => {
+                                        switch (e.key) {
+                                        case 'Tab':
+                                        this.handleTab(e);
+                                        break;
+                                        case 'Enter':
+                                        case ' ':
+                                        this.handleActivation(e);
+                                        break;
+                                        case 'Escape':
+                                        this.handleEscape(e);
+                                        break;
+                                        case 'ArrowUp':
+                                        case 'ArrowDown':
+                                        case 'ArrowLeft':
+                                        case 'ArrowRight':
+                                        this.handleArrows(e);
+                                        break;
+                                        }
+                                        });
+
+                                        // Focus indicators
+                                        document.addEventListener('focusin', (e) => {
+                                        e.target.classList.add('keyboard-focused');
+                                        });
+
+                                        document.addEventListener('focusout', (e) => {
+                                        e.target.classList.remove('keyboard-focused');
+                                        });
+
+                                        // Mouse click removes keyboard focus indicator
+                                        document.addEventListener('mousedown', (e) => {
+                                        if (e.target.classList.contains('keyboard-focused')) {
+                                        e.target.classList.remove('keyboard-focused');
+                                        }
+                                        });
+                                        }
+
+                                        updateFocusableElements() {
+                                        this.focusableElements = Array.from(
+                                        document.querySelectorAll(
+                                        'button:not([disabled]), a[href], input:not([disabled]), ' +
+                                        'select:not([disabled]), textarea:not([disabled]), ' +
+                                        '[tabindex]:not([tabindex="-1"]), [role="button"]:not([disabled])'
+                                        )
+                                        ).filter(el => this.isVisible(el));
+                                        }
+
+                                        isVisible(element) {
+                                        const style = window.getComputedStyle(element);
+                                        return style.display !== 'none' &&
+                                        style.visibility !== 'hidden' &&
+                                        element.offsetParent !== null;
+                                        }
+
+                                        handleTab(e) {
+                                        if (!this.trapFocus) return;
+
+                                        this.updateFocusableElements();
+
+                                        if (this.focusableElements.length === 0) return;
+
+                                        const activeElement = document.activeElement;
+                                        const currentIndex = this.focusableElements.indexOf(activeElement);
+
+                                        if (e.shiftKey) {
+                                        // Shift+Tab - назад
+                                        const nextIndex = currentIndex <= 0 ? this.focusableElements.length - 1 :
+                                            currentIndex - 1; this.focusableElements[nextIndex].focus(); } else { // Tab
+                                            - вперед const nextIndex=currentIndex>= this.focusableElements.length - 1 ?
+                                            0 : currentIndex + 1;
+                                            this.focusableElements[nextIndex].focus();
+                                            }
+
+                                            e.preventDefault();
+                                            }
+
+                                            handleActivation(e) {
+                                            const activeElement = document.activeElement;
+
+                                            if (activeElement.tagName === 'BUTTON' ||
+                                            activeElement.getAttribute('role') === 'button') {
+                                            // Не активувати якщо це вже input або textarea
+                                            if (activeElement.tagName !== 'INPUT' &&
+                                            activeElement.tagName !== 'TEXTAREA') {
+                                            activeElement.click();
+                                            e.preventDefault();
+                                            }
+                                            }
+                                            }
+
+                                            handleEscape(e) {
+                                            // Закрити модальні вікна
+                                            const modal = document.querySelector('.modal.open');
+                                            if (modal) {
+                                            const closeBtn = modal.querySelector('.modal-close');
+                                            if (closeBtn) closeBtn.click();
+                                            e.preventDefault();
+                                            return;
+                                            }
+
+                                            // Очистити фільтри (Ctrl+Escape)
+                                            if (e.ctrlKey) {
+                                            const clearBtn = document.querySelector('.btn-clear');
+                                            if (clearBtn) clearBtn.click();
+                                            e.preventDefault();
+                                            }
+                                            }
+
+                                            handleArrows(e) {
+                                            // Навігація в таблицях
+                                            const activeElement = document.activeElement;
+                                            if (activeElement.tagName === 'TD' || activeElement.tagName === 'TH') {
+                                            this.navigateTable(e);
+                                            return;
+                                            }
+
+                                            // Навігація між листами (ArrowLeft/ArrowRight)
+                                            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                                            // Не перехоплювати якщо фокус на input
+                                            if (activeElement.tagName === 'INPUT' ||
+                                            activeElement.tagName === 'TEXTAREA' ||
+                                            activeElement.tagName === 'SELECT') {
+                                            return;
+                                            }
+
+                                            const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
+                                            const activeButton = document.querySelector('.nav-btn.active');
+                                            const currentIndex = navButtons.indexOf(activeButton);
+
+                                            if (currentIndex === -1) return;
+
+                                            let nextIndex;
+                                            if (e.key === 'ArrowLeft') {
+                                            nextIndex = currentIndex > 0 ? currentIndex - 1 : navButtons.length - 1;
+                                            } else {
+                                            nextIndex = currentIndex < navButtons.length - 1 ? currentIndex + 1 : 0; }
+                                                navButtons[nextIndex].click(); e.preventDefault(); } } navigateTable(e)
+                                                { const cell=document.activeElement; const row=cell.parentElement; const
+                                                table=row.closest('table'); if (!table) return; const
+                                                rows=Array.from(table.querySelectorAll('tr')); const
+                                                cells=Array.from(row.children); const rowIndex=rows.indexOf(row); const
+                                                cellIndex=cells.indexOf(cell); let targetCell=null; if
+                                                (e.key==='ArrowUp' && rowIndex> 0) {
+                                                const targetRow = rows[rowIndex - 1];
+                                                targetCell = targetRow.children[cellIndex];
+                                                } else if (e.key === 'ArrowDown' && rowIndex < rows.length - 1) { const
+                                                    targetRow=rows[rowIndex + 1];
+                                                    targetCell=targetRow.children[cellIndex]; } else if
+                                                    (e.key==='ArrowLeft' && cellIndex> 0) {
+                                                    targetCell = cells[cellIndex - 1];
+                                                    } else if (e.key === 'ArrowRight' && cellIndex < cells.length - 1) {
+                                                        targetCell=cells[cellIndex + 1]; } if (targetCell) {
+                                                        targetCell.setAttribute('tabindex', '0' ); targetCell.focus();
+                                                        e.preventDefault(); } } enableFocusTrap() { this.trapFocus=true;
+                                                        this.updateFocusableElements(); } disableFocusTrap() {
+                                                        this.trapFocus=false; } }
+                                                        //============================================// APPLICATION
+                                                        CLASS //============================================/** *
+                                                        DashboardApp - Головний клас додатку */ class DashboardApp {
+                                                        constructor() { this.stateManager=new StateManager();
+                                                        this.cacheManager=new CacheManager(); this.apiClient=new
+                                                        APIClient(this.cacheManager); this.visualizationManager=new
+                                                        VisualizationManager(); this.filterManager=new
+                                                        FilterManager(this.stateManager); this.bookmarkManager=new
+                                                        BookmarkManager(this.stateManager); this.comparisonManager=new
+                                                        ComparisonManager(this.stateManager); this.lazyLoader=new
+                                                        LazyLoader('.content', this.visualizationManager);
+                                                        this.keyboardNav=new KeyboardNavigationManager(); this.init(); }
+                                                        init() { console.log('Dashboard App initialized'); // Підписка
+                                                        на зміни стану this.stateManager.subscribe((state)=> {
+                                                        console.log('State updated:', state);
+                                                        });
+
+                                                        // Відстеження онлайн/офлайн статусу
+                                                        window.addEventListener('online', () => {
+                                                        this.stateManager.setState({ isOnline: true });
+                                                        console.log('Online');
+                                                        });
+
+                                                        window.addEventListener('offline', () => {
+                                                        this.stateManager.setState({ isOnline: false });
+                                                        console.log('Offline');
+                                                        });
+
+                                                        // Додати іконки до кнопок навігації
+                                                        this.addIconsToNavButtons();
+                                                        }
+
+                                                        addIconsToNavButtons() {
+                                                        document.querySelectorAll('.nav-btn').forEach(btn => {
+                                                        const sheetName = btn.textContent.trim();
+                                                        const icon = this.visualizationManager.getSheetIcon(sheetName);
+                                                        const isBookmarked =
+                                                        this.bookmarkManager.isBookmarked(sheetName);
+                                                        const bookmarkIcon = isBookmarked ? '⭐' : '☆';
+
+                                                        btn.innerHTML = `${icon} ${sheetName} <span
+                                                            class="bookmark-btn ${isBookmarked ? 'bookmarked' : ''}"
+                                                            onclick="event.stopPropagation(); app.toggleBookmark('${sheetName}')">${bookmarkIcon}</span>`;
+                                                        });
+
+                                                        // Додати секцію улюблених
+                                                        this.renderFavorites();
+                                                        }
+
+                                                        renderFavorites() {
+                                                        const bookmarks = this.bookmarkManager.getBookmarks();
+
+                                                        // Видалити стару секцію улюблених якщо є
+                                                        const oldFavorites =
+                                                        document.querySelector('.favorites-section');
+                                                        if (oldFavorites) {
+                                                        oldFavorites.remove();
+                                                        }
+
+                                                        if (bookmarks.length === 0) return;
+
+                                                        // Створити нову секцію улюблених
+                                                        const favSection = document.createElement('div');
+                                                        favSection.className = 'nav-section favorites-section';
+                                                        favSection.innerHTML = `
+                                                        <h3>⭐ Улюблені</h3>
+                                                        <div class="nav-buttons">
+                                                            ${bookmarks.map(sheetName => {
+                                                            const icon =
+                                                            this.visualizationManager.getSheetIcon(sheetName);
+                                                            return `<button class="nav-btn"
+                                                                onclick="app.loadSheet('${sheetName}')">${icon}
+                                                                ${sheetName} <span class="bookmark-btn bookmarked"
+                                                                    onclick="event.stopPropagation(); app.toggleBookmark('${sheetName}')">⭐</span></button>`;
+                                                            }).join('')}
+                                                        </div>
+                                                        `;
+
+                                                        // Додати на початок навігації
+                                                        const nav = document.querySelector('.nav');
+                                                        nav.insertBefore(favSection, nav.firstChild);
+                                                        }
+
+                                                        toggleBookmark(sheetName) {
+                                                        const added = this.bookmarkManager.toggle(sheetName);
+                                                        console.log(`Bookmark ${added ? 'added' : 'removed'}:
+                                                        ${sheetName}`);
+
+                                                        // Оновити UI
+                                                        this.addIconsToNavButtons();
+                                                        }
+
+                                                        async loadSheet(sheetName) {
+                                                        try {
+                                                        this.stateManager.setState({ currentSheet: sheetName });
+
+                                                        document.getElementById('sheetTitle').textContent = sheetName;
+
+                                                        // Показати skeleton screen замість простого spinner
+                                                        this.showSkeletonScreen();
+                                                        document.getElementById('dataTable').classList.add('hidden');
+
+                                                        // Активна кнопка
+                                                        document.querySelectorAll('.nav-btn').forEach(btn =>
+                                                        btn.classList.remove('active'));
+                                                        event.target.classList.add('active');
+
+                                                        // Показати швидкі фільтри та кнопку порівняння для історичних
+                                                        листів
+                                                        const quickFiltersDiv = document.getElementById('quickFilters');
+                                                        const compareBtn = document.getElementById('compareBtn');
+                                                        if (sheetName.includes('Різниця')) {
+                                                        quickFiltersDiv.style.display = 'flex';
+                                                        compareBtn.style.display = 'block';
+                                                        } else {
+                                                        quickFiltersDiv.style.display = 'none';
+                                                        compareBtn.style.display = 'none';
+                                                        }
+
+                                                        // Завантаження даних (з кешу або API)
+                                                        const data = await this.apiClient.getSheetData(sheetName);
+
+                                                        this.stateManager.setState({
+                                                        currentData: data,
+                                                        filteredData: data
+                                                        });
+
+                                                        this.displayData(data);
+                                                        } catch (error) {
+                                                        this.showError(error);
+                                                        }
+                                                        }
+
+                                                        setQuickFilter(filterType) {
+                                                        const state = this.stateManager.getState();
+
+                                                        // Оновити стан
+                                                        this.stateManager.setState({
+                                                        filters: {
+                                                        ...state.filters,
+                                                        quickFilter: filterType
+                                                        }
+                                                        });
+
+                                                        // Візуально виділити активну кнопку
+                                                        this.updateQuickFilterUI(filterType);
+
+                                                        // Застосувати фільтри
+                                                        this.applyFilters();
+                                                        }
+
+                                                        clearQuickFilter() {
+                                                        const state = this.stateManager.getState();
+
+                                                        // Очистити швидкий фільтр
+                                                        this.stateManager.setState({
+                                                        filters: {
+                                                        ...state.filters,
+                                                        quickFilter: null
+                                                        }
+                                                        });
+
+                                                        // Оновити UI
+                                                        this.updateQuickFilterUI(null);
+
+                                                        // Застосувати фільтри
+                                                        this.applyFilters();
+                                                        }
+
+                                                        updateQuickFilterUI(activeFilter) {
+                                                        // Видалити активний клас з усіх кнопок
+                                                        document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+                                                        btn.classList.remove('active');
+                                                        });
+
+                                                        // Додати активний клас до вибраної кнопки
+                                                        if (activeFilter) {
+                                                        const activeBtn =
+                                                        document.querySelector(`.quick-filter-btn[data-filter="${activeFilter}"]`);
+                                                        if (activeBtn) {
+                                                        activeBtn.classList.add('active');
+                                                        }
+                                                        }
+                                                        }
+
+                                                        displayData(data) {
+                                                        // Приховати всі індикатори завантаження
+                                                        this.hideAllLoadingIndicators();
+                                                        document.getElementById('dataTable').classList.remove('hidden');
+
+                                                        if (data.length === 0) {
+                                                        document.getElementById('tableBody').innerHTML = '<tr>
+                                                            <td colspan="100">Немає даних</td>
+                                                        </tr>';
+                                                        return;
+                                                        }
+
+                                                        // Заголовки
+                                                        const thead = document.getElementById('tableHead');
+                                                        thead.innerHTML = '<tr role="row">' +
+                                                            data[0].map(cell => `<th role="columnheader" scope="col">
+                                                                ${cell}</th>`).join('') +
+                                                            '</tr>';
+
+                                                        // Дані
+                                                        this.renderTable(data.slice(1));
+
+                                                        // Оновити підрозділи для фільтра
+                                                        this.updateSubdivisions(data);
+                                                        }
+
+                                                        renderTable(data) {
+                                                        const state = this.stateManager.getState();
+                                                        const isHistorySheet = state.currentSheet &&
+                                                        state.currentSheet.includes('Різниця');
+
+                                                        // Використати LazyLoader для великих датасетів
+                                                        if (data.length > 100) {
+                                                        const headers = state.currentData[0];
+                                                        this.lazyLoader.setData(data, headers, isHistorySheet);
+
+                                                        // Показати повідомлення про lazy loading
+                                                        if (data.length === this.lazyLoader.allData.length) {
+                                                        console.log(`Lazy loading enabled for ${data.length} rows`);
+                                                        }
+                                                        } else {
+                                                        // Для невеликих датасетів використовуємо звичайний рендеринг
+                                                        const tbody = document.getElementById('tableBody');
+
+                                                        if (isHistorySheet && data.length > 1) {
+                                                        tbody.innerHTML = data.map((row, rowIndex) => {
+                                                        const cells = row.map((cell, colIndex) => {
+                                                        if (colIndex === 0) {
+                                                        return `<td>${cell}</td>`;
+                                                        }
+
+                                                        const previousValue = rowIndex > 0 ? data[rowIndex -
+                                                        1][colIndex] : null;
+                                                        const colorInfo = this.visualizationManager.colorizeChange(cell,
+                                                        previousValue);
+
+                                                        if (colorInfo.class === 'neutral') {
+                                                        return `<td>${cell}</td>`;
+                                                        }
+
+                                                        return `<td class="cell-${colorInfo.class}"
+                                                            style="background-color: ${colorInfo.color}">
+                                                            ${cell} <span class="change-arrow">${colorInfo.arrow}</span>
+                                                        </td>`;
+                                                        }).join('');
+
+                                                        return `<tr>${cells}</tr>`;
+                                                        }).join('');
+                                                        } else {
+                                                        tbody.innerHTML = data.map(row =>
+                                                        '<tr>' + row.map(cell => `<td>${cell}</td>`).join('') + '</tr>'
+                                                        ).join('');
+                                                        }
+                                                        }
+
+                                                        document.getElementById('recordCount').textContent =
+                                                        `${data.length} записів`;
+                                                        document.getElementById('recordCount').classList.remove('hidden');
+                                                        }
+
+                                                        updateSubdivisions(data) {
+                                                        const select = document.getElementById('subdivisionFilter');
+                                                        const subdivisions = new Set();
+
+                                                        if (data.length > 2) {
+                                                        data.slice(3).forEach(row => {
+                                                        if (row[0]) subdivisions.add(row[0]);
+                                                        });
+                                                        }
+
+                                                        select.innerHTML = '<option value="">Всі підрозділи</option>' +
+                                                        Array.from(subdivisions).map(sub => `<option value="${sub}">
+                                                            ${sub}</option>
+                                                        `).join('');
+                                                        }
+
+                                                        applyFilters() {
+                                                        const state = this.stateManager.getState();
+                                                        const searchTerm =
+                                                        document.getElementById('searchInput').value.toLowerCase();
+                                                        const dateFilter = document.getElementById('dateFilter').value;
+                                                        const subdivisionFilter =
+                                                        document.getElementById('subdivisionFilter').value;
+
+                                                        // Оновити стан фільтрів
+                                                        this.stateManager.setState({
+                                                        filters: {
+                                                        ...state.filters,
+                                                        search: searchTerm,
+                                                        subdivision: subdivisionFilter
+                                                        }
+                                                        });
+
+                                                        // Застосувати фільтри через FilterManager
+                                                        const dataToFilter = state.currentData.slice(1);
+                                                        const filteredData =
+                                                        this.filterManager.applyFilters(dataToFilter);
+
+                                                        this.stateManager.setState({
+                                                        filteredData: filteredData
+                                                        });
+
+                                                        this.renderTable(filteredData);
+                                                        }
+
+                                                        clearFilters() {
+                                                        document.getElementById('searchInput').value = '';
+                                                        document.getElementById('dateFilter').value = '';
+                                                        document.getElementById('subdivisionFilter').value = '';
+
+                                                        // Скинути активні швидкі фільтри
+                                                        this.updateQuickFilterUI(null);
+
+                                                        this.stateManager.setState({
+                                                        filters: {
+                                                        search: '',
+                                                        dateRange: null,
+                                                        subdivision: '',
+                                                        quickFilter: null
+                                                        }
+                                                        });
+
+                                                        this.applyFilters();
+                                                        }
+
+                                                        async exportToPDF() {
+                                                        const state = this.stateManager.getState();
+
+                                                        if (!state.currentSheet) {
+                                                        alert('Спочатку оберіть лист для експорту');
+                                                        return;
+                                                        }
+
+                                                        try {
+                                                        this.showLoadingOverlay('Генерація PDF...');
+
+                                                        const url = await
+                                                        this.apiClient.exportSheetToPDF(state.currentSheet);
+
+                                                        this.hideLoadingOverlay();
+                                                        window.open(url, '_blank');
+                                                        } catch (error) {
+                                                        this.hideLoadingOverlay();
+                                                        alert('Помилка експорту: ' + error.message);
+                                                        }
+                                                        }
+
+                                                        openComparisonModal() {
+                                                        const modal = document.getElementById('comparisonModal');
+                                                        modal.classList.add('open');
+                                                        modal.setAttribute('aria-hidden', 'false');
+
+                                                        // Увімкнути focus trap
+                                                        this.keyboardNav.enableFocusTrap();
+
+                                                        // Фокус на першому полі
+                                                        setTimeout(() => {
+                                                        document.getElementById('compareDate1').focus();
+                                                        }, 100);
+                                                        }
+
+                                                        closeComparisonModal() {
+                                                        const modal = document.getElementById('comparisonModal');
+                                                        modal.classList.remove('open');
+                                                        modal.setAttribute('aria-hidden', 'true');
+
+                                                        // Вимкнути focus trap
+                                                        this.keyboardNav.disableFocusTrap();
+
+                                                        // Очистити поля
+                                                        document.getElementById('compareDate1').value = '';
+                                                        document.getElementById('compareDate2').value = '';
+                                                        }
+
+                                                        async compareData() {
+                                                        const date1Str = document.getElementById('compareDate1').value;
+                                                        const date2Str = document.getElementById('compareDate2').value;
+
+                                                        if (!date1Str || !date2Str) {
+                                                        alert('Будь ласка, оберіть обидві дати');
+                                                        return;
+                                                        }
+
+                                                        try {
+                                                        const date1 = new Date(date1Str);
+                                                        const date2 = new Date(date2Str);
+
+                                                        const state = this.stateManager.getState();
+                                                        const data = state.currentData.slice(1); // Без заголовків
+
+                                                        const differences = this.comparisonManager.compare(data, date1,
+                                                        date2);
+
+                                                        // Зберегти результати порівняння в стані
+                                                        this.stateManager.setState({
+                                                        comparison: {
+                                                        date1: date1,
+                                                        date2: date2,
+                                                        differences: differences
+                                                        }
+                                                        });
+
+                                                        // Відобразити результати
+                                                        this.displayComparisonResults(differences);
+
+                                                        // Закрити модальне вікно
+                                                        this.closeComparisonModal();
+
+                                                        } catch (error) {
+                                                        alert('Помилка порівняння: ' + error.message);
+                                                        console.error('Comparison error:', error);
+                                                        }
+                                                        }
+
+                                                        displayComparisonResults(differences) {
+                                                        const tbody = document.getElementById('tableBody');
+                                                        const state = this.stateManager.getState();
+                                                        const headers = state.currentData[0];
+
+                                                        // Створити таблицю порівняння
+                                                        tbody.innerHTML = `
+                                                        <tr style="background: #f8f9fa; font-weight: bold;">
+                                                            <td>Показник</td>
+                                                            <td>Дата 1</td>
+                                                            <td>Дата 2</td>
+                                                            <td>Різниця</td>
+                                                            <td>% Зміни</td>
+                                                        </tr>
+                                                        ${differences.map((diff, index) => {
+                                                        if (diff.difference === null) return '';
+
+                                                        const colorInfo =
+                                                        this.visualizationManager.colorizeChange(diff.value2,
+                                                        diff.value1);
+
+                                                        return `
+                                                        <tr>
+                                                            <td><strong>${headers[diff.column] || `Колонка
+                                                                    ${diff.column}`}</strong>
+                                                            </td>
+                                                            <td>${diff.value1}</td>
+                                                            <td>${diff.value2}</td>
+                                                            <td class="cell-${colorInfo.class}"
+                                                                style="background-color: ${colorInfo.color}">
+                                                                ${diff.difference > 0 ? '+' : ''}${diff.difference}
+                                                                ${colorInfo.arrow}
+                                                            </td>
+                                                            <td class="cell-${colorInfo.class}">
+                                                                ${diff.percentChange !== 'N/A' ? (diff.difference > 0 ?
+                                                                '+' : '') +
+                                                                diff.percentChange + '%' : 'N/A'}
+                                                            </td>
+                                                        </tr>
+                                                        `;
+                                                        }).join('')}
+                                                        `;
+
+                                                        document.getElementById('recordCount').textContent =
+                                                        `Порівняння:
+                                                        ${differences.filter(d
+                                                        => d.difference !== null).length} показників`;
+                                                        document.getElementById('recordCount').classList.remove('hidden');
+                                                        }
+
+                                                        // ============================================
+                                                        // LOADING INDICATORS METHODS
+                                                        // ============================================
+
+                                                        showSkeletonScreen() {
+                                                        document.getElementById('loadingSpinner').classList.add('hidden');
+                                                        document.getElementById('skeletonScreen').classList.remove('hidden');
+                                                        document.getElementById('dataTable').classList.add('hidden');
+                                                        }
+
+                                                        showSpinner(text = 'Завантаження даних...') {
+                                                        const spinner = document.getElementById('loadingSpinner');
+                                                        const spinnerText = spinner.querySelector('.spinner-text');
+                                                        if (spinnerText) {
+                                                        spinnerText.textContent = text;
+                                                        }
+                                                        spinner.classList.remove('hidden');
+                                                        document.getElementById('skeletonScreen').classList.add('hidden');
+                                                        document.getElementById('dataTable').classList.add('hidden');
+                                                        }
+
+                                                        showProgressBar(current, total, text = '') {
+                                                        const progressContainer =
+                                                        document.getElementById('progressContainer');
+                                                        const progressBar = document.getElementById('progressBar');
+                                                        const progressText = document.getElementById('progressText');
+
+                                                        const percentage = Math.round((current / total) * 100);
+
+                                                        progressContainer.classList.remove('hidden');
+                                                        progressBar.style.width = percentage + '%';
+
+                                                        if (progressText && text) {
+                                                        progressText.classList.remove('hidden');
+                                                        progressText.textContent = text || `${current} з ${total}
+                                                        (${percentage}%)`;
+                                                        }
+                                                        }
+
+                                                        hideProgressBar() {
+                                                        document.getElementById('progressContainer').classList.add('hidden');
+                                                        document.getElementById('progressText').classList.add('hidden');
+                                                        }
+
+                                                        showLoadingOverlay(text = 'Обробка...') {
+                                                        const overlay = document.getElementById('loadingOverlay');
+                                                        const overlayText = document.getElementById('overlayText');
+                                                        if (overlayText) {
+                                                        overlayText.textContent = text;
+                                                        }
+                                                        overlay.classList.remove('hidden');
+                                                        }
+
+                                                        hideLoadingOverlay() {
+                                                        document.getElementById('loadingOverlay').classList.add('hidden');
+                                                        }
+
+                                                        hideAllLoadingIndicators() {
+                                                        document.getElementById('loadingSpinner').classList.add('hidden');
+                                                        document.getElementById('skeletonScreen').classList.add('hidden');
+                                                        this.hideProgressBar();
+                                                        this.hideLoadingOverlay();
+                                                        }
+
+                                                        showError(error) {
+                                                        this.hideAllLoadingIndicators();
+                                                        alert('Помилка: ' + error.message);
+                                                        console.error('Error:', error);
+                                                        }
+                                                        }
+
+                                                        // ============================================
+                                                        // INITIALIZATION
+                                                        // ============================================
+
+                                                        // Глобальний екземпляр додатку
+                                                        const app = new DashboardApp();
+
+                                                        // Експорт для використання в HTML
+                                                        window.app = app;
+
+                                                        </script>
+
+                                                        <!-- Global Loading Overlay -->
+                                                        <div id="loadingOverlay" class="loading-overlay hidden"
+                                                            role="alert" aria-live="assertive" aria-busy="true">
+                                                            <div class="spinner-enhanced">
+                                                                <div class="spinner-circle" aria-hidden="true"></div>
+                                                                <div class="spinner-text" id="overlayText">Обробка...
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+</body>
+
+</html>
