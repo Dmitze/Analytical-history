@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Filters Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .quick-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+
+        .quick-filter-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-filter-btn:hover {
+            background: #f0f4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .quick-filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .quick-filter-btn[data-filter="clear"] {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .quick-filter-btn[data-filter="clear"]:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .status {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .status h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quick Filters UI Test</h1>
+    
+    <div class="quick-filters" id="quickFilters">
+        <button class="quick-filter-btn" data-filter="today" onclick="setQuickFilter('today')">📅 Сьогодні</button>
+        <button class="quick-filter-btn" data-filter="week" onclick="setQuickFilter('week')">📆 Тиждень</button>
+        <button class="quick-filter-btn" data-filter="month" onclick="setQuickFilter('month')">📊 Місяць</button>
+        <button class="quick-filter-btn" data-filter="quarter" onclick="setQuickFilter('quarter')">📈 Квартал</button>
+        <button class="quick-filter-btn" data-filter="clear" onclick="clearQuickFilter()">✖ Скинути</button>
+    </div>
+
+    <div class="status">
+        <h3>Статус фільтра:</h3>
+        <p id="filterStatus">Не вибрано</p>
+    </div>
+
+    <script>
+        let currentFilter = null;
+
+        function setQuickFilter(filterType) {
+            currentFilter = filterType;
+            updateQuickFilterUI(filterType);
+            updateStatus();
+        }
+
+        function clearQuickFilter() {
+            currentFilter = null;
+            updateQuickFilterUI(null);
+            updateStatus();
+        }
+
+        function updateQuickFilterUI(activeFilter) {
+            // Видалити активний клас з усіх кнопок
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Додати активний клас до вибраної кнопки
+            if (activeFilter) {
+                const activeBtn = document.querySelector(`.quick-filter-btn[data-filter="${activeFilter}"]`);
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                }
+            }
+        }
+
+        function updateStatus() {
+            const statusEl = document.getElementById('filterStatus');
+            if (currentFilter) {
+                const filterNames = {
+                    'today': 'Сьогодні',
+                    'week': 'Тиждень (7 днів)',
+                    'month': 'Місяць (30 днів)',
+                    'quarter': 'Квартал (90 днів)'
+                };
+                statusEl.textContent = `Активний фільтр: ${filterNames[currentFilter]}`;
+                statusEl.style.color = '#667eea';
+                statusEl.style.fontWeight = 'bold';
+            } else {
+                statusEl.textContent = 'Не вибрано';
+                statusEl.style.color = '#6c757d';
+                statusEl.style.fontWeight = 'normal';
+            }
+        }
+    </script>
+</body>
+</html>
