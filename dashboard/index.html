@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналітична Панель</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📊 Аналітична Панель</h1>
+            <button class="btn-pdf" id="exportPDF">📥 Завантажити PDF</button>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-section">
+                <h3>Звіти</h3>
+                <button class="nav-btn" data-sheet="РЕБ">РЕБ</button>
+                <button class="nav-btn" data-sheet="Речова">Речова</button>
+                <button class="nav-btn" data-sheet="ЕТС">ЕТС</button>
+                <button class="nav-btn" data-sheet="Інж">Інж</button>
+                <button class="nav-btn" data-sheet="СІІЗ">СІІЗ</button>
+                <button class="nav-btn" data-sheet="Прод">Прод</button>
+            </div>
+            <div class="nav-section">
+                <h3>Історія</h3>
+                <button class="nav-btn" data-sheet="Різниця Інж">Різниця Інж</button>
+                <button class="nav-btn" data-sheet="Різниця Прод">Різниця Прод</button>
+                <button class="nav-btn" data-sheet="Різниця ЕТС">Різниця ЕТС</button>
+                <button class="nav-btn" data-sheet="Різниця СІІЗ">Різниця СІІЗ</button>
+                <button class="nav-btn" data-sheet="Різниця РЕБ">Різниця РЕБ</button>
+                <button class="nav-btn" data-sheet="Різниця Речова">Різниця Речова</button>
+            </div>
+            <div class="nav-section">
+                <h3>Архів</h3>
+                <button class="nav-btn" data-sheet="ArchiveBackup">ArchiveBackup</button>
+            </div>
+        </nav>
+
+        <!-- Filters -->
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="🔍 Пошук...">
+            <input type="date" id="dateFilter" placeholder="Дата">
+            <select id="subdivisionFilter">
+                <option value="">Всі підрозділи</option>
+            </select>
+            <button class="btn-clear" id="clearFilters">Очистити</button>
+        </div>
+
+        <!-- Content -->
+        <main class="content">
+            <div class="sheet-header">
+                <h2 id="sheetTitle">Оберіть лист</h2>
+                <span id="recordCount" class="record-count"></span>
+            </div>
+            <div class="table-wrapper">
+                <div id="loadingSpinner" class="spinner">Завантаження...</div>
+                <table id="dataTable" class="data-table">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
